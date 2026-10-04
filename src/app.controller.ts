@@ -1,12 +1,22 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service.js';
+import {
+  Body,
+  Controller,
+  HttpException,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
+import { LoginDto } from './auth/dto/login.dto.js';
+import { AuthService } from './app.service.js';
 
-@Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+@Controller('auth')
+export class AuthController {
+  constructor(private authService: AuthService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Post('login')
+  async login(@Body() data: LoginDto) {
+    const usertoken = await this.authService.validateUser(data);
+    if (!usertoken)
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+    return usertoken;
   }
 }
